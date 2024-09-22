@@ -68,6 +68,42 @@
   </div>
 
   <script>
+
+    const soundFileURls = {
+      correct: "coin_sound.wav",
+      incorrect: "miss.wav",
+      "A": "tone_narration/A.m4a",
+      "A#": "tone_narration/A#.m4a",
+      "B": "tone_narration/B.m4a",
+      "C": "tone_narration/C.m4a",
+      "C#": "tone_narration/C#.m4a",
+      "D": "tone_narration/D.m4a",
+      "D#": "tone_narration/D.m4a",
+      "E": "tone_narration/E.m4a",
+      "F": "tone_narration/F.m4a",
+      "F#": "tone_narration/F#.m4a",
+      "G": "tone_narration/G.m4a",
+      "G#": "tone_narration/G#.m4a"
+    }
+
+
+    function PlaySound(s) {
+      const player = new Audio();
+
+      player.volume = 0.1;
+
+      const baseUrl = "audio/"
+
+      player.src = baseUrl + soundFileURls[s]
+
+      player.load();
+      player.play();
+    }
+
+
+  </script>
+
+  <script>
     let ws;
     let correctCounter = 0;
     let highscoreCounter = 0;
@@ -82,11 +118,15 @@
 
         if (data.type === 'newTone') {
           document.getElementById('tone').innerText = `Play: ${data.tone}`;
+          PlaySound(data.tone);
+
         } else if (data.type === 'correct') {
           document.getElementById('message').innerText = `Correct! You played ${data.detectedTone}`;
           correctCounter++;
+          //PlaySound("correct")
           document.getElementById('counter').innerText = `Correct in a row: ${correctCounter}`;
         } else if (data.type === 'wrong') {
+          PlaySound("incorrect");
 
           if (correctCounter > highscoreCounter) {
             const time = ((Date.now() - startTime) / 1000).toFixed(1);
