@@ -5,14 +5,17 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.21.0",
     "naudiodon": "^2.3.6",
     "node-record-lpcm16": "^1.0.1",
     "pitchfinder": "^2.3.2",
-    "pitchy": "^4.1.0"
+    "pitchy": "^4.1.0",
+    "ws": "^8.18.0"
   }
 }

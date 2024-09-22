@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bass Pitch Recognition</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    #tone {
+      font-size: 3em;
+      margin: 20px 0;
+    }
+    #message {
+      font-size: 1.5em;
+    }
+    #counter {
+      font-size: 2em;
+      margin: 20px 0;
+    }
+    .scale-selection {
+      margin: 20px;
+    }
+    button {
+      padding: 10px;
+      font-size: 1.2em;
+    }
+
+    #highscore {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      margin-top: 20px;
+    }
+
+    #highscore > * {
+      margin-bottom: 12px;
+    }
+
+    
+  </style>
+</head>
+<body>
+
+  <h1>Bass Pitch Recognition</h1>
+  <div id="tone">Waiting for a random tone...</div>
+  <div id="message"></div>
+  <div id="counter">Correct in a row: 0</div>
+
+  <div id="highscore">
+    <h5>Highscore</h5>
+    <div id="highscore__counts"></div>
+    <div id="highscore__time"></div>
+  </div>
+
+  <div class="scale-selection">
+    <h3>Select Scale(s):</h3>
+    <label><input type="checkbox" value="C" class="scale" /> C Major</label>
+    <label><input type="checkbox" value="G" class="scale" /> G Major</label>
+    <label><input type="checkbox" value="A" class="scale" /> A Minor</label>
+    <label><input type="checkbox" value="D" class="scale" /> D Minor</label>
+    <br><br>
+    <button id="start">Start</button>
+  </div>
+
+  <script>
+    let ws;
+    let correctCounter = 0;
+    let highscoreCounter = 0;
+    let highscoreTime = "";
+
+    // Open WebSocket connection
+    function connectWebSocket() {
+      ws = new WebSocket('ws://localhost:3000');
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'newTone') {
+          document.getElementById('tone').innerText = `Play: ${data.tone}`;
+        } else if (data.type === 'correct') {
+          document.getElementById('message').innerText = `Correct! You played ${data.detectedTone}`;
+          correctCounter++;
+          document.getElementById('counter').innerText = `Correct in a row: ${correctCounter}`;
+        } else if (data.type === 'wrong') {
+
+          if (correctCounter > highscoreCounter) {
+            const time = ((Date.now() - startTime) / 1000).toFixed(1);
+            console.log(time);
+            highscoreCounter = correctCounter;
+            highscoreTime = time;
+            document.getElementById('highscore__counts').innerText = `Correct in a row: ${highscoreCounter}`;
+            document.getElementById('highscore__time').innerText = `Time: ${time}s`;
+          }
+          else if (correctCounter === highscoreCounter) {
+            const time = ((Date.now() - startTime) / 1000).toFixed(1);
+
+            if (time < highscoreTime) {
+              highscoreCounter = correctCounter;
+              highscoreTime = time;
+              document.getElementById('highscore__counts').innerText = `Correct in a row: ${highscoreCounter}`;
+              document.getElementById('highscore__time').innerText = `Time: ${time}s`;
+            }
+          }
+
+          document.getElementById('message').innerText = `Wrong! You played ${data.detectedTone}`;
+          correctCounter = 0;
+          startTime = Date.now();
+          document.getElementById('counter').innerText = `Correct in a row: 0`;
+        }
+      };
+
+      ws.onclose = () => {
+        document.getElementById('message').innerText = 'Connection lost. Reconnecting...';
+        setTimeout(connectWebSocket, 1000); // Reconnect automatically after 1 second
+      };
+    }
+
+    let startTime;
+
+    // Send selected scales to server
+    function startGame() {
+      startTime = Date.now();
+      const selectedScales = [];
+
+      document.querySelectorAll('.scale:checked').forEach((checkbox) => {
+        if (checkbox.value === 'C') selectedScales.push(['C', 'D', 'E', 'F', 'G', 'A', 'B']);
+        if (checkbox.value === 'G') selectedScales.push(['G', 'A', 'B', 'C', 'D', 'E', 'F#']);
+        if (checkbox.value === 'A') selectedScales.push(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
+        if (checkbox.value === 'D') selectedScales.push(['D', 'E', 'F', 'G', 'A', 'B', 'C']);
+      });
+
+      if (selectedScales.length > 0) {
+        ws.send(JSON.stringify({
+          type: 'selectScale',
+          scales: selectedScales,
+        }));
+      } else {
+        document.getElementById('message').innerText = 'Please select at least one scale!';
+      }
+    }
+
+    document.getElementById('start').addEventListener('click', startGame);
+
+    // Initiate WebSocket connection
+    connectWebSocket();
+  </script>
+
+</body>
+</html>
