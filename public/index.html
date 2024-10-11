@@ -60,9 +60,10 @@
   <div class="scale-selection">
     <h3>Select Scale(s):</h3>
     <label><input type="checkbox" value="C" class="scale" /> C Major</label>
+    <label><input type="checkbox" value="Cm" class="scale" /> C Minor</label>
     <label><input type="checkbox" value="G" class="scale" /> G Major</label>
-    <label><input type="checkbox" value="A" class="scale" /> A Minor</label>
-    <label><input type="checkbox" value="D" class="scale" /> D Minor</label>
+    <label><input type="checkbox" value="Am" class="scale" /> A Minor</label>
+    <label><input type="checkbox" value="Dm" class="scale" /> D Minor</label>
     <br><br>
     <button id="start">Start</button>
   </div>
@@ -81,7 +82,7 @@
       "D#": "tone_narration/D.m4a",
       "E": "tone_narration/E.m4a",
       "F": "tone_narration/F.m4a",
-      "F#": "tone_narration/F#.m4a",
+      "F#": "tone_narration/F_sharp.m4a",
       "G": "tone_narration/G.m4a",
       "G#": "tone_narration/G#.m4a"
     }
@@ -169,9 +170,10 @@
 
       document.querySelectorAll('.scale:checked').forEach((checkbox) => {
         if (checkbox.value === 'C') selectedScales.push(['C', 'D', 'E', 'F', 'G', 'A', 'B']);
+        if (checkbox.value === 'Cm') selectedScales.push(['C', 'D', 'D#', 'F', 'G', 'G#', 'B']);
         if (checkbox.value === 'G') selectedScales.push(['G', 'A', 'B', 'C', 'D', 'E', 'F#']);
-        if (checkbox.value === 'A') selectedScales.push(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
-        if (checkbox.value === 'D') selectedScales.push(['D', 'E', 'F', 'G', 'A', 'B', 'C']);
+        if (checkbox.value === 'Am') selectedScales.push(['A', 'B', 'C', 'D', 'E', 'F', 'G']);
+        if (checkbox.value === 'Dm') selectedScales.push(['D', 'E', 'F', 'G', 'A', 'B', 'C']);
       });
 
       if (selectedScales.length > 0) {

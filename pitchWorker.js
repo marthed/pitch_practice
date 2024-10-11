@@ -1,24 +1,10 @@
 import record from 'node-record-lpcm16';
 import Pitchfinder from 'pitchfinder';
 
-import child_process from 'child_process';
-
-// List available devices using 'arecord' on Linux, or 'sox' on macOS/Linux
-child_process.exec('arecord -l', (err, stdout, stderr) => {
-  if (err) {
-    console.error('Error fetching input devices', err);
-    return;
-  }
-  console.log('Available devices:', stdout);
-});
-
 // Create the pitch detector
 const detectPitch = Pitchfinder.YIN({
-  threshold: 0.1,
+  threshold: 0.05, // Adjust sensitivity threshold for detection
 });
-
-const minPitch = 30;  // Lowered pitch threshold to capture lower notes (B0)
-const maxPitch = 400; // Highest expected pitch (24th fret on G string)
 
 // Utility to convert pitch to tone name (e.g., A1, C#2)
 const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -32,14 +18,16 @@ function getNoteFromPitch(frequency) {
   return `${noteNames[noteIndex]}${octave}`;
 }
 
-// Exported function to start pitch detection
-export function startPitchDetection(onPitchDetected) {
+// Listen for messages from the parent process
+process.on('message', ({ minPitch, maxPitch, sampleRate, buffer }) => {
+  console.log(`Starting pitch detection for range: ${minPitch} Hz - ${maxPitch} Hz with sampleRate: ${sampleRate} and buffer: ${buffer}`);
+
   const recording = record.record({
-    sampleRate: 44100,
+    sampleRate: sampleRate,
     channels: 1,
-    device: 'AudioBox USB',
+    device: 'AudioBox USB',  // Adjust for your device if necessary
     audioType: 'raw',
-    buffer: 2048,
+    buffer: buffer,
   });
 
   recording.stream().on('data', (chunk) => {
@@ -50,12 +38,10 @@ export function startPitchDetection(onPitchDetected) {
 
     const pitch = detectPitch(floatArray);
 
-    if (pitch) {
-      if (pitch && pitch >= minPitch && pitch <= maxPitch) {
-        const detectedTone = getNoteFromPitch(pitch);
-        console.log(`Detected pitch: ${pitch.toFixed(2)} Hz (Note: ${detectedTone})`);
-        onPitchDetected(detectedTone);
-      }
+    if (pitch && pitch >= minPitch && pitch <= maxPitch) {
+      const frequency = maxPitch === 100 ? pitch / 2 : pitch;
+      const detectedTone = getNoteFromPitch(frequency);
+      process.send({ pitch: frequency.toFixed(2), note: detectedTone });
     }
   });
-}
+});

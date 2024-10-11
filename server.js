@@ -1,7 +1,8 @@
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import http from 'http';
-import { startPitchDetection } from './pitchDetection.js'; // Import pitch detection logic
+//import { startPitchDetection } from './pitchDetection.js'; // Import pitch detection logic
+import { startPitchDetection } from './threadPitchDetection.js';
 
 // Utility to convert scales to actual notes
 const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -26,6 +27,7 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (message) => {
     const data = JSON.parse(message);
+    console.log(data);
     if (data.type === 'selectScale') {
       scales = data.scales;
       console.log(scales);
