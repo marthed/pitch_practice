@@ -5,17 +5,24 @@
   "main": "main.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
+    "start": "node locomotionServer.js",
+    "start:pitch": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.21.0",
+    "express": "^4.21.1",
     "naudiodon": "^2.3.6",
     "node-record-lpcm16": "^1.0.1",
     "pitchfinder": "^2.3.2",
     "pitchy": "^4.1.0",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "eslint": "^9.13.0",
+    "globals": "^15.11.0",
+    "prettier": "^3.3.3"
   }
 }

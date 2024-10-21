@@ -4,7 +4,7 @@ import Pitchfinder from 'pitchfinder';
 import child_process from 'child_process';
 
 // List available devices using 'arecord' on Linux, or 'sox' on macOS/Linux
-child_process.exec('arecord -l', (err, stdout, stderr) => {
+child_process.exec('arecord -l', (err, stdout) => {
   if (err) {
     console.error('Error fetching input devices', err);
     return;
@@ -17,11 +17,24 @@ const detectPitch = Pitchfinder.YIN({
   threshold: 0.1,
 });
 
-const minPitch = 30;  // Lowered pitch threshold to capture lower notes (B0)
+const minPitch = 30; // Lowered pitch threshold to capture lower notes (B0)
 const maxPitch = 400; // Highest expected pitch (24th fret on G string)
 
 // Utility to convert pitch to tone name (e.g., A1, C#2)
-const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const noteNames = [
+  'C',
+  'C#',
+  'D',
+  'D#',
+  'E',
+  'F',
+  'F#',
+  'G',
+  'G#',
+  'A',
+  'A#',
+  'B',
+];
 
 function getNoteFromPitch(frequency) {
   const A4 = 440;
@@ -53,7 +66,9 @@ export function startPitchDetection(onPitchDetected) {
     if (pitch) {
       if (pitch && pitch >= minPitch && pitch <= maxPitch) {
         const detectedTone = getNoteFromPitch(pitch);
-        console.log(`Detected pitch: ${pitch.toFixed(2)} Hz (Note: ${detectedTone})`);
+        console.log(
+          `Detected pitch: ${pitch.toFixed(2)} Hz (Note: ${detectedTone})`,
+        );
         onPitchDetected(detectedTone);
       }
     }
